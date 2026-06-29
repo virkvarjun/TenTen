@@ -14,7 +14,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </Link>
             <Nav />
           </div>
-          <ResetDemoButton />
+          <div className="flex items-center gap-1">
+            <Link
+              href="/onboarding"
+              className="rounded-lg px-3 py-1.5 text-sm font-medium text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900"
+            >
+              Recalibrate
+            </Link>
+            <ResetDemoButton />
+          </div>
         </div>
       </header>
       <main className="mx-auto max-w-5xl px-5 py-8">{children}</main>

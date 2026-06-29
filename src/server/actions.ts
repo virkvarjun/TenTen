@@ -1,21 +1,28 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import type { Ask, Decision, DecisionContext, Goal, WorkType } from "@/domain/types";
+import type { Ask, Chronotype, Decision, DecisionContext, Goal, WorkType } from "@/domain/types";
 import { hasAnthropic } from "@/lib/env";
 import { decide } from "@/server/decision/engine";
 import {
   acceptAsk as acceptAskInStore,
+  beginOnboarding,
+  completeOnboarding,
   createGoal,
   declineAsk as declineAskInStore,
   deleteGoal,
   getSnapshot,
+  onboardCeiling,
+  onboardChronotype,
+  onboardGoals,
+  onboardWorkPattern,
   recordAsk,
   recordCheckIn,
   resetStore,
   undoAsk as undoAskInStore,
   updateGoal,
   type GoalInput,
+  type WorkPattern,
 } from "@/server/store";
 import { parseAsk } from "@/server/ask-parser";
 import type { AskRecord } from "@/server/types";
@@ -121,6 +128,35 @@ export async function undoAskAction(askId: string): Promise<void> {
 
 export async function declineAskAction(askId: string): Promise<void> {
   declineAskInStore(askId);
+  refreshAll();
+}
+
+// --- Onboarding ----------------------------------------------------------
+
+export async function beginOnboardingAction(): Promise<void> {
+  beginOnboarding();
+}
+
+export async function onboardChronotypeAction(chronotype: Chronotype): Promise<void> {
+  onboardChronotype(chronotype);
+}
+
+export async function onboardCeilingAction(hours: number): Promise<void> {
+  onboardCeiling(hours);
+}
+
+export async function onboardGoalsAction(
+  goals: Array<{ title: string; type: WorkType; targetHoursPerWeek: number }>,
+): Promise<void> {
+  onboardGoals(goals);
+}
+
+export async function onboardWorkPatternAction(pattern: WorkPattern): Promise<void> {
+  onboardWorkPattern(pattern);
+}
+
+export async function completeOnboardingAction(): Promise<void> {
+  completeOnboarding();
   refreshAll();
 }
 

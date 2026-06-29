@@ -8,8 +8,10 @@ import type {
   Goal,
   WorkType,
 } from "@/domain/types";
+import type { Chronotype } from "@/domain/types";
 import { buildSchedule } from "@/domain/scheduler/scheduler";
-import { createBudget } from "@/domain/budget/budget";
+import { createBudget, clampCeiling } from "@/domain/budget/budget";
+import { defaultEnergyProfile } from "@/domain/energy/energy";
 import { applyLearning, signalsFromCheckIns } from "@/domain/learning/learning";
 import { atHour, hourOf, startOfDay } from "@/domain/time";
 import { seedDay, DEMO_WEEK_FRACTION } from "@/server/mock/seed";
@@ -37,6 +39,8 @@ interface DayState {
   asks: AskRecord[];
   /** ISO date string of the last day the learning loop ran (for idempotency). */
   lastLearnedDay?: string;
+  /** Whether onboarding has been completed. */
+  onboarded: boolean;
 }
 
 const globalForStore = globalThis as unknown as { meridianStore?: DayState };
@@ -55,6 +59,7 @@ function init(): DayState {
     budget: seeded.budget,
     checkIns: seeded.checkIns,
     asks: [],
+    onboarded: true,
   };
 }
 
@@ -206,6 +211,100 @@ export function undoAsk(askId: string): boolean {
 export function declineAsk(askId: string): void {
   const record = state().asks.find((a) => a.id === askId);
   if (record) record.status = "declined";
+}
+
+// --- Onboarding ----------------------------------------------------------
+
+/** Begin a fresh onboarding: clear goals, blocks, and check-ins. */
+export function beginOnboarding(): void {
+  const s = state();
+  s.goals = [];
+  s.fixedBlocks = [];
+  s.plannedBlocks = [];
+  s.checkIns = [];
+  s.asks = [];
+  s.onboarded = false;
+  s.budget = createBudget(s.ceilingHours);
+}
+
+/** Step 1: chronotype → seed the energy curve. */
+export function onboardChronotype(chronotype: Chronotype): void {
+  const s = state();
+  s.energy = defaultEnergyProfile(chronotype);
+  replan(s);
+}
+
+/** Step 2: deep-work ceiling (clamped 4–6). */
+export function onboardCeiling(hours: number): void {
+  const s = state();
+  s.ceilingHours = clampCeiling(hours);
+  replan(s);
+}
+
+/**
+ * Step 3: goal portfolio, in priority order. Weight derives from order (first =
+ * highest), so the drag-to-rank UI maps straight onto contention weight.
+ */
+export function onboardGoals(
+  goals: Array<{ title: string; type: WorkType; targetHoursPerWeek: number }>,
+): void {
+  const s = state();
+  s.goals = goals.map((g, i) => ({
+    id: `goal-${cryptoId()}`,
+    title: g.title,
+    weight: Math.max(1, 10 - i),
+    type: g.type,
+    targetHoursPerWeek: g.targetHoursPerWeek,
+    progressHours: 0,
+    status: "active" as const,
+  }));
+  replan(s);
+}
+
+export interface WorkPattern {
+  workStartHour: number;
+  workEndHour: number;
+  inOffice: boolean;
+  commuteMinutes: number;
+}
+
+/**
+ * Step 4: work + commute pattern. In-office days add commute as fixed blocks so
+ * the scheduler protects peaks from being burned in transit.
+ */
+export function onboardWorkPattern(pattern: WorkPattern): void {
+  const s = state();
+  const day = s.day;
+  s.fixedBlocks = s.fixedBlocks.filter((b) => !b.id.startsWith("commute-"));
+  if (pattern.inOffice && pattern.commuteMinutes > 0) {
+    const commuteHours = pattern.commuteMinutes / 60;
+    s.fixedBlocks.push({
+      id: "commute-morning",
+      start: atHour(day, pattern.workStartHour - commuteHours),
+      end: atHour(day, pattern.workStartHour),
+      type: "admin",
+      source: "fixed",
+      energyMatchScore: 0,
+    });
+    s.fixedBlocks.push({
+      id: "commute-evening",
+      start: atHour(day, pattern.workEndHour),
+      end: atHour(day, pattern.workEndHour + commuteHours),
+      type: "admin",
+      source: "fixed",
+      energyMatchScore: 0,
+    });
+  }
+  replan(s);
+}
+
+/** Finish onboarding. */
+export function completeOnboarding(): void {
+  state().onboarded = true;
+}
+
+export function isOnboarded(): boolean {
+  return state().onboarded;
 }
 
 export interface LearningResult {
