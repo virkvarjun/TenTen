@@ -163,5 +163,24 @@ persisted to `localStorage` so it's resumable, and re-runnable from the header
 "Recalibrate" link. Ends by rendering the seeded Today view. Calendar step
 degrades when Google isn't configured.
 
-**Next: Phase 5** — a distinctive design language + deliberate motion (the energy
-curve as the signature/hero), replacing the quiet placeholder styling.
+**Phase 5 — complete.** Design language + motion.
+
+- **Design language** — _"a spectrograph at rest."_ Tokens in `globals.css`
+  (`@theme`): palette (`ink #14161B`, `canvas #EEF1F5`, `surface`, `line`, and the
+  energy spectrum `peak #3D5AFE` / `mid #12B5A8` / `trough #F2A65A`), three fonts
+  (Space Grotesk display, Archivo body, JetBrains Mono data), a soft radius scale.
+  All surfaces + primitives derive from tokens (no stock neutral/indigo).
+- **Signature** — the energy curve is a spectrograph: the stroke's hue encodes
+  energy temperature along the day, on a fine tick baseline, with a mono current-
+  hour readout. `EnergyCurve.tsx`.
+- **Motion** (`framer-motion`) — one orchestrated Today page-load (curve draws →
+  blocks settle → budget fills), a breathing current-hour marker, an LLM "thinking"
+  state resolving into the verdict card, a quiet heartbeat-drift pulse, and `Reveal`
+  micro-entrances. `prefers-reduced-motion` is respected everywhere (curve/blocks
+  render static; a global CSS fallback neutralises transitions).
+- **Quality floor** — responsive grids, visible `focus-visible` rings on every
+  control, designed empty/error copy, consistent action vocabulary.
+- Screenshots in `docs/screenshots/` (generated via Playwright).
+
+**Next: Phase 6** — the test suite: domain unit tests, the LLM output contract,
+key API routes, component tests, and an E2E happy path; CI on every push.

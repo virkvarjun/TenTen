@@ -18,8 +18,8 @@ export default function GoalsPage() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight">Goals</h1>
-        <p className="mt-1 text-sm text-neutral-600">
+        <h1 className="font-display text-2xl font-semibold tracking-tight">Goals</h1>
+        <p className="text-ink-soft mt-1 text-sm">
           Your portfolio. Weight sets priority; the scheduler spends your best hours on what weighs
           most and is furthest behind.
         </p>

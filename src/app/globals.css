@@ -1,37 +1,82 @@
 @import "tailwindcss";
 
 /*
- * Meridian base styles. The real design language (tokens, type, the energy-curve
- * signature) lands in Phase 5. For now this is a neutral, quiet foundation.
+ * Meridian design language — "a spectrograph at rest."
+ * A precision instrument for attention: cool paper canvas, ink-navy type, and a
+ * duotone energy spectrum (indigo peaks → teal mid → amber troughs) that turns
+ * the energy curve into an instrument readout.
  */
 
+@theme {
+  /* Palette — chosen for this subject, not a default. */
+  --color-ink: #14161b;
+  --color-ink-soft: #5b6472;
+  --color-ink-faint: #8b93a1;
+  --color-canvas: #eef1f5;
+  --color-surface: #ffffff;
+  --color-line: #d8dee6;
+  --color-line-soft: #e6eaef;
+
+  /* Energy spectrum — the signature duotone. */
+  --color-peak: #3d5afe;
+  --color-mid: #12b5a8;
+  --color-trough: #f2a65a;
+
+  /* Work-type accents, drawn from the same instrument palette. */
+  --color-deep: #3d5afe;
+  --color-shallow: #4d8bd4;
+  --color-admin: #8b93a1;
+  --color-health: #12b5a8;
+  --color-social: #f2a65a;
+
+  /* Action / signal. */
+  --color-signal: #3d5afe;
+  --color-signal-weak: #e7ebff;
+
+  /* States. */
+  --color-good: #12b5a8;
+  --color-warn: #e08a3c;
+  --color-bad: #e5564b;
+
+  /* Type. */
+  --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, "SF Mono", monospace;
+
+  /* Radius scale — soft, deliberate (no zero-radius broadsheet edges). */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #0a0a0a;
+  color-scheme: light;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  font-family: var(--font-sans);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family:
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    "Segoe UI",
-    Roboto,
-    Helvetica,
-    Arial,
-    sans-serif;
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Tabular figures for the data/timeline faces. */
+.font-mono {
+  font-feature-settings: "tnum" 1;
+}
+
+/* Calm static fallback when motion is unwelcome. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }

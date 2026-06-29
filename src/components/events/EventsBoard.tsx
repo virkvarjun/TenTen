@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { motion } from "framer-motion";
 import type { Verdict } from "@/domain/types";
 import { hourOf } from "@/domain/time";
 import {
@@ -23,18 +24,18 @@ const EXAMPLES = [
 
 const VERDICT_STYLE: Record<Verdict, { ring: string; chip: string; label: string }> = {
   accept: {
-    ring: "border-emerald-200 bg-emerald-50",
-    chip: "bg-emerald-600 text-white",
+    ring: "border-good/35 bg-good/8",
+    chip: "bg-good text-white",
     label: "Accept",
   },
   defer: {
-    ring: "border-amber-200 bg-amber-50",
-    chip: "bg-amber-500 text-white",
+    ring: "border-warn/40 bg-warn/8",
+    chip: "bg-warn text-white",
     label: "Defer",
   },
   decline: {
-    ring: "border-red-200 bg-red-50",
-    chip: "bg-red-600 text-white",
+    ring: "border-bad/35 bg-bad/8",
+    chip: "bg-bad text-white",
     label: "Decline",
   },
 };
@@ -66,7 +67,7 @@ export function EventsBoard({ history }: { history: AskHistoryView[] }) {
   return (
     <div className="space-y-6">
       <Card className="space-y-3">
-        <label htmlFor="ask" className="block text-sm font-medium text-neutral-700">
+        <label htmlFor="ask" className="text-ink block text-sm font-medium">
           Someone’s asking for your time. What is it?
         </label>
         <textarea
@@ -75,7 +76,7 @@ export function EventsBoard({ history }: { history: AskHistoryView[] }) {
           onChange={(e) => setText(e.target.value)}
           rows={2}
           placeholder="e.g. Raj wants to run at 4, ~45 min"
-          className="w-full resize-none rounded-lg border border-neutral-300 px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:outline-none"
+          className="border-line focus-visible:ring-signal w-full resize-none rounded-lg border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:outline-none"
         />
         <div className="flex flex-wrap items-center gap-2">
           {EXAMPLES.map((ex) => (
@@ -83,7 +84,7 @@ export function EventsBoard({ history }: { history: AskHistoryView[] }) {
               key={ex}
               type="button"
               onClick={() => setText(ex)}
-              className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs text-neutral-600 hover:bg-neutral-100"
+              className="border-line bg-canvas text-ink-soft hover:bg-line-soft rounded-full border px-3 py-1 text-xs"
             >
               {ex}
             </button>
@@ -108,9 +109,9 @@ export function EventsBoard({ history }: { history: AskHistoryView[] }) {
       )}
 
       <section>
-        <h2 className="mb-3 text-sm font-semibold text-neutral-900">Earlier decisions</h2>
+        <h2 className="text-ink mb-3 text-sm font-semibold">Earlier decisions</h2>
         {history.length === 0 ? (
-          <p className="text-sm text-neutral-500">
+          <p className="text-ink-soft text-sm">
             No asks yet. Try one of the examples — you’ll get a verdict with the reasoning behind
             it.
           </p>
@@ -133,23 +134,25 @@ export function EventsBoard({ history }: { history: AskHistoryView[] }) {
 
 function ThinkingCard() {
   return (
-    <Card className="flex items-center gap-3 text-sm text-neutral-600">
-      <span className="flex gap-1" aria-hidden>
-        <Dot delay="0ms" />
-        <Dot delay="150ms" />
-        <Dot delay="300ms" />
-      </span>
-      Weighing this against your goals, energy, and remaining budget…
-    </Card>
-  );
-}
-
-function Dot({ delay }: { delay: string }) {
-  return (
-    <span
-      className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-neutral-400"
-      style={{ animationDelay: delay }}
-    />
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <Card className="text-ink-soft flex items-center gap-3 text-sm">
+        <span className="flex gap-1.5" aria-hidden>
+          {[0, 1, 2].map((i) => (
+            <motion.span
+              key={i}
+              className="bg-signal inline-block h-1.5 w-1.5 rounded-full"
+              animate={{ opacity: [0.25, 1, 0.25], scale: [0.8, 1.1, 0.8] }}
+              transition={{ duration: 1.1, repeat: Infinity, delay: i * 0.18, ease: "easeInOut" }}
+            />
+          ))}
+        </span>
+        Weighing this against your goals, energy, and remaining budget…
+      </Card>
+    </motion.div>
   );
 }
 
@@ -174,45 +177,56 @@ function ResultCard({
     : null;
 
   return (
-    <Card className={cn("border-2", style.ring)}>
-      <div className="mb-3 flex items-center justify-between">
-        <span className={cn("rounded-full px-3 py-1 text-xs font-semibold", style.chip)}>
-          {style.label}
-        </span>
-        <span className="text-xs text-neutral-500">
-          {engine === "llm" ? "Claude" : "Heuristic engine"} ·{" "}
-          {formatHours(parsed.durationMin / 60)}
-        </span>
-      </div>
-
-      <p className="text-sm leading-relaxed text-neutral-800">{decision.rationale}</p>
-
-      {slot && (
-        <div className="mt-3 flex items-center gap-2 text-sm">
-          <span className="text-neutral-500">
-            {decision.verdict === "accept" ? "Slotting at" : "Better slot"}:
+    <motion.div
+      initial={{ opacity: 0, y: 10, scale: 0.99 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+    >
+      <Card className={cn("border-2", style.ring)}>
+        <div className="mb-3 flex items-center justify-between">
+          <span
+            className={cn(
+              "rounded-full px-3 py-1 font-mono text-xs font-semibold tracking-tight",
+              style.chip,
+            )}
+          >
+            {style.label}
           </span>
-          <span className="font-medium text-neutral-900">
-            {formatHourRange(slot.startHour, slot.endHour)}
+          <span className="text-ink-soft font-mono text-xs">
+            {engine === "llm" ? "Claude" : "Heuristic engine"} ·{" "}
+            {formatHours(parsed.durationMin / 60)}
           </span>
         </div>
-      )}
 
-      {decision.displaces.length > 0 && (
-        <p className="mt-1 text-xs text-neutral-500">Would move: {decision.displaces.join(", ")}</p>
-      )}
+        <p className="text-ink text-sm leading-relaxed">{decision.rationale}</p>
 
-      <div className="mt-4 flex gap-2">
-        {decision.verdict !== "decline" && (
-          <Button onClick={onAccept} disabled={busy}>
-            {decision.verdict === "accept" ? "Add to my day" : "Take the better slot"}
-          </Button>
+        {slot && (
+          <div className="mt-3 flex items-center gap-2 text-sm">
+            <span className="text-ink-soft">
+              {decision.verdict === "accept" ? "Slotting at" : "Better slot"}:
+            </span>
+            <span className="text-ink font-medium">
+              {formatHourRange(slot.startHour, slot.endHour)}
+            </span>
+          </div>
         )}
-        <Button variant="secondary" onClick={onDecline} disabled={busy}>
-          {decision.verdict === "decline" ? "Got it" : "Pass"}
-        </Button>
-      </div>
-    </Card>
+
+        {decision.displaces.length > 0 && (
+          <p className="text-ink-soft mt-1 text-xs">Would move: {decision.displaces.join(", ")}</p>
+        )}
+
+        <div className="mt-4 flex gap-2">
+          {decision.verdict !== "decline" && (
+            <Button onClick={onAccept} disabled={busy}>
+              {decision.verdict === "accept" ? "Add to my day" : "Take the better slot"}
+            </Button>
+          )}
+          <Button variant="secondary" onClick={onDecline} disabled={busy}>
+            {decision.verdict === "decline" ? "Got it" : "Pass"}
+          </Button>
+        </div>
+      </Card>
+    </motion.div>
   );
 }
 
@@ -233,13 +247,13 @@ function HistoryRow({
           <span className={cn("rounded-full px-2 py-0.5 text-xs font-semibold", style.chip)}>
             {style.label}
           </span>
-          <span className="truncate text-sm font-medium text-neutral-900">{item.description}</span>
+          <span className="text-ink truncate text-sm font-medium">{item.description}</span>
         </div>
-        <p className="mt-1 line-clamp-2 text-xs text-neutral-500">{item.rationale}</p>
+        <p className="text-ink-soft mt-1 line-clamp-2 text-xs">{item.rationale}</p>
       </div>
       <div className="flex shrink-0 items-center gap-2">
         {item.slot && (
-          <span className="text-xs text-neutral-500 tabular-nums">
+          <span className="text-ink-soft text-xs tabular-nums">
             {formatHourRange(item.slot.startHour, item.slot.endHour)}
           </span>
         )}

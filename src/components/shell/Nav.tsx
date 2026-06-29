@@ -23,11 +23,9 @@ export function Nav() {
             href={link.href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
-              "focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:outline-none",
-              active
-                ? "bg-neutral-900 text-white"
-                : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900",
+              "rounded-sm px-3 py-1.5 text-sm font-medium tracking-tight transition-colors",
+              "focus-visible:ring-signal focus-visible:ring-2 focus-visible:outline-none",
+              active ? "bg-ink text-canvas" : "text-ink-soft hover:bg-line-soft hover:text-ink",
             )}
           >
             {link.label}

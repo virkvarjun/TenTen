@@ -1,6 +1,7 @@
 "use client";
 
 import { useId } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import type { WorkType } from "@/domain/types";
 import { formatHour, workTypeLabel } from "@/lib/format";
 import { cn } from "@/lib/cn";
@@ -25,26 +26,42 @@ export interface EnergyCurveProps {
 
 const W = 960;
 const H = 320;
-const PAD_X = 20;
-const CURVE_TOP = 28;
-const CURVE_BOTTOM = 188;
+const PAD_X = 24;
+const CURVE_TOP = 30;
+const CURVE_BOTTOM = 186;
 const LANE_TOP = 206;
 const LANE_BOTTOM = 252;
 const AXIS_Y = 286;
 
-/** Fill colours for block rects, derived from the same per-type palette. */
+/** Energy → color temperature: amber trough → teal mid → indigo peak. */
+const TROUGH: RGB = [242, 166, 90];
+const MID: RGB = [18, 181, 168];
+const PEAK: RGB = [61, 90, 254];
+type RGB = [number, number, number];
+
 const BLOCK_FILL: Record<WorkType, string> = {
-  deep: "#6366f1",
-  shallow: "#0ea5e9",
-  admin: "#a3a3a3",
-  health: "#10b981",
-  social: "#f59e0b",
+  deep: "#3d5afe",
+  shallow: "#4d8bd4",
+  admin: "#8b93a1",
+  health: "#12b5a8",
+  social: "#f2a65a",
 };
 
+function energyColor(e: number): string {
+  const t = Math.min(1, Math.max(0, e));
+  const [a, b, f] = t < 0.5 ? [TROUGH, MID, t / 0.5] : [MID, PEAK, (t - 0.5) / 0.5];
+  const mix = (i: number) => {
+    const av = a[i] ?? 0;
+    const bv = b[i] ?? 0;
+    return Math.round(av + (bv - av) * f);
+  };
+  return `rgb(${mix(0)}, ${mix(1)}, ${mix(2)})`;
+}
+
 /**
- * The signature element: a real, data-driven energy curve with the day's blocks
- * laid beneath it and a live current-hour marker. Built structurally correct in
- * Phase 2; Phase 5 turns it into the instrument it wants to be.
+ * The signature: a real, data-driven energy curve rendered as a spectrograph.
+ * The stroke's hue encodes energy temperature along the day; the day's blocks
+ * settle onto a fine instrument baseline; a live current-hour readout breathes.
  */
 export function EnergyCurve({
   hourlyScores,
@@ -55,6 +72,8 @@ export function EnergyCurve({
   className,
 }: EnergyCurveProps) {
   const gradientId = useId();
+  const areaId = useId();
+  const reduce = useReducedMotion();
   const span = Math.max(1, endHour - startHour);
   const plotW = W - PAD_X * 2;
 
@@ -69,24 +88,36 @@ export function EnergyCurve({
   const linePath = smoothPath(points);
   const areaPath = `${linePath} L ${xFor(endHour)} ${CURVE_BOTTOM} L ${xFor(startHour)} ${CURVE_BOTTOM} Z`;
   const inRange = currentHour >= startHour && currentHour <= endHour;
-  const markerX = xFor(clamp(currentHour, startHour, endHour));
-  const markerEnergy = hourlyScores[Math.floor(clamp(currentHour, startHour, endHour))] ?? 0;
+  const markerHour = clamp(currentHour, startHour, endHour);
+  const markerX = xFor(markerHour);
+  const markerEnergy = hourlyScores[Math.floor(markerHour)] ?? 0;
+
+  // Spectrum stops: one per hour, colored by that hour's energy.
+  const stops = points.map((_, i) => {
+    const h = startHour + i;
+    return { offset: i / span, color: energyColor(hourlyScores[h] ?? 0) };
+  });
 
   return (
     <svg
       viewBox={`0 0 ${W} ${H}`}
       className={cn("h-auto w-full", className)}
       role="img"
-      aria-label="Your energy across the day with scheduled blocks beneath it"
+      aria-label="Your energy across the day, with scheduled blocks laid beneath it"
     >
       <defs>
-        <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#6366f1" stopOpacity="0.28" />
-          <stop offset="100%" stopColor="#6366f1" stopOpacity="0.02" />
+        <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="0">
+          {stops.map((s, i) => (
+            <stop key={i} offset={`${s.offset * 100}%`} stopColor={s.color} />
+          ))}
+        </linearGradient>
+        <linearGradient id={areaId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#3d5afe" stopOpacity="0.16" />
+          <stop offset="100%" stopColor="#3d5afe" stopOpacity="0" />
         </linearGradient>
       </defs>
 
-      {/* horizontal guide lines */}
+      {/* instrument guide lines */}
       {[0.25, 0.5, 0.75, 1].map((level) => (
         <line
           key={level}
@@ -94,81 +125,135 @@ export function EnergyCurve({
           x2={W - PAD_X}
           y1={yFor(level)}
           y2={yFor(level)}
-          stroke="#e5e5e5"
+          stroke="#e6eaef"
           strokeWidth={1}
-          strokeDasharray="2 4"
         />
       ))}
 
-      {/* energy area + curve */}
-      <path d={areaPath} fill={`url(#${gradientId})`} />
-      <path
+      {/* hour ticks on the baseline */}
+      {Array.from({ length: span + 1 }).map((_, i) => {
+        const h = startHour + i;
+        const major = h % 2 === 0;
+        return (
+          <line
+            key={h}
+            x1={xFor(h)}
+            x2={xFor(h)}
+            y1={CURVE_BOTTOM}
+            y2={CURVE_BOTTOM + (major ? 6 : 3)}
+            stroke="#c3cad4"
+            strokeWidth={1}
+          />
+        );
+      })}
+
+      {/* energy area + spectrum curve (one gesture — the stroke draws in) */}
+      <path d={areaPath} fill={`url(#${areaId})`} />
+      <motion.path
         d={linePath}
         fill="none"
-        stroke="#4f46e5"
-        strokeWidth={2.5}
+        stroke={`url(#${gradientId})`}
+        strokeWidth={3}
         strokeLinecap="round"
         strokeLinejoin="round"
+        initial={reduce ? false : { pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 1.1, ease: "easeInOut" }}
       />
 
-      {/* blocks lane */}
-      {blocks.map((block) => {
+      {/* blocks settle onto the baseline */}
+      {blocks.map((block, i) => {
         const x = xFor(Math.max(startHour, block.startHour));
         const x2 = xFor(Math.min(endHour, block.endHour));
         const width = Math.max(2, x2 - x);
         return (
-          <g key={block.id}>
+          <motion.g
+            key={block.id}
+            initial={reduce ? false : { opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 1.1 + i * 0.07, ease: "easeOut" }}
+          >
             <rect
               x={x}
               y={LANE_TOP}
               width={width}
               height={LANE_BOTTOM - LANE_TOP}
-              rx={6}
+              rx={5}
               fill={BLOCK_FILL[block.type]}
-              fillOpacity={block.source === "fixed" ? 0.45 : 0.9}
-              stroke={block.source === "fixed" ? BLOCK_FILL[block.type] : "none"}
+              fillOpacity={block.source === "fixed" ? 0.22 : 0.92}
+              stroke={BLOCK_FILL[block.type]}
+              strokeOpacity={block.source === "fixed" ? 0.5 : 0}
               strokeDasharray={block.source === "fixed" ? "3 3" : undefined}
             >
               <title>{`${block.label} · ${workTypeLabel(block.type)} · ${formatHour(
                 block.startHour,
               )}–${formatHour(block.endHour)}`}</title>
             </rect>
-            {width > 54 && (
+            {width > 56 && (
               <text
-                x={x + 6}
+                x={x + 7}
                 y={LANE_TOP + 27}
                 fontSize={11}
-                fill={block.source === "fixed" ? "#525252" : "#ffffff"}
+                className="font-mono"
+                fill={block.source === "fixed" ? "#5b6472" : "#ffffff"}
                 fontWeight={600}
               >
                 {truncate(block.label, Math.floor(width / 7))}
               </text>
             )}
-          </g>
+          </motion.g>
         );
       })}
 
-      {/* current-hour marker */}
+      {/* current-hour readout — breathes with real time */}
       {inRange && (
-        <g>
+        <motion.g
+          initial={reduce ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, delay: 1.9 }}
+        >
           <line
             x1={markerX}
             x2={markerX}
-            y1={CURVE_TOP - 6}
-            y2={LANE_BOTTOM + 6}
-            stroke="#111827"
-            strokeWidth={1.5}
+            y1={CURVE_TOP - 8}
+            y2={LANE_BOTTOM + 8}
+            stroke="#14161b"
+            strokeWidth={1.25}
+            strokeOpacity={0.5}
           />
-          <circle cx={markerX} cy={yFor(markerEnergy)} r={5} fill="#111827" />
-          <text x={markerX + 6} y={CURVE_TOP + 2} fontSize={11} fontWeight={700} fill="#111827">
-            now
+          <motion.circle
+            cx={markerX}
+            cy={yFor(markerEnergy)}
+            r={5}
+            fill="#14161b"
+            animate={reduce ? undefined : { scale: [1, 1.25, 1] }}
+            transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
+            style={{ transformOrigin: `${markerX}px ${yFor(markerEnergy)}px` }}
+          />
+          <text
+            x={markerX + 8}
+            y={CURVE_TOP + 2}
+            fontSize={11}
+            className="font-mono"
+            fontWeight={700}
+            fill="#14161b"
+          >
+            now · {Math.round(markerEnergy * 100)}%
           </text>
-        </g>
+        </motion.g>
       )}
 
       {/* hour axis */}
       {hourTicks(startHour, endHour).map((h) => (
-        <text key={h} x={xFor(h)} y={AXIS_Y} fontSize={11} fill="#737373" textAnchor="middle">
+        <text
+          key={h}
+          x={xFor(h)}
+          y={AXIS_Y}
+          fontSize={11}
+          className="font-mono"
+          fill="#8b93a1"
+          textAnchor="middle"
+        >
           {formatHour(h)}
         </text>
       ))}
@@ -182,7 +267,7 @@ function hourTicks(start: number, end: number): number[] {
   return ticks;
 }
 
-/** Catmull-Rom → cubic Bézier smoothing for an instrument-like curve. */
+/** Catmull-Rom → cubic Bézier smoothing for an instrument-grade curve. */
 function smoothPath(points: Array<{ x: number; y: number }>): string {
   if (points.length === 0) return "";
   if (points.length < 3) {

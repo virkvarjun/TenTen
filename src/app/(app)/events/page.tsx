@@ -26,8 +26,8 @@ export default function EventsPage() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight">Events</h1>
-        <p className="mt-1 text-sm text-neutral-600">
+        <h1 className="font-display text-2xl font-semibold tracking-tight">Events</h1>
+        <p className="text-ink-soft mt-1 text-sm">
           Hand Meridian an incoming ask. It weighs your goals, your energy, and your remaining
           budget — then tells you to accept, defer, or decline, and why.
         </p>

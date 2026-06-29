@@ -20,10 +20,26 @@ deep goal needs.
 
 ## Screenshots
 
-> _Coming in Phase 5 (design + motion pass)._
->
-> - Today — the energy curve with planned blocks and the deep-work budget meter
-> - Events — an incoming ask resolved into a verdict + rationale
+**Today** — the signature: a data-driven energy curve rendered as a spectrograph
+(indigo peaks → teal mid → amber troughs), the day's blocks settled on an
+instrument baseline, a live `now · 70%` readout, and the deep-work budget meter.
+
+![Today](docs/screenshots/today.png)
+
+| Goals                                | Events                                 | Onboarding                                     |
+| ------------------------------------ | -------------------------------------- | ---------------------------------------------- |
+| ![Goals](docs/screenshots/goals.png) | ![Events](docs/screenshots/events.png) | ![Onboarding](docs/screenshots/onboarding.png) |
+
+### Design language
+
+_"A spectrograph at rest."_ Meridian is a precision instrument for attention.
+Cool paper canvas (`#EEF1F5`), ink-navy type, and a duotone energy spectrum
+(`peak #3D5AFE` → `mid #12B5A8` → `trough #F2A65A`) that encodes energy as colour
+temperature along the curve. Type: Space Grotesk (display), Archivo (body),
+JetBrains Mono (data/timeline). Motion is one orchestrated page-load sequence on
+Today (curve draws → blocks settle → budget fills), a breathing current-hour
+marker, and a distinct LLM "thinking" state — all respecting
+`prefers-reduced-motion`.
 
 ## Local setup
 

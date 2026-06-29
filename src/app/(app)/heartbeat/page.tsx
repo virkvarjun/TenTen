@@ -41,8 +41,8 @@ export default function HeartbeatPage() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight">Heartbeat</h1>
-        <p className="mt-1 text-sm text-neutral-600">
+        <h1 className="font-display text-2xl font-semibold tracking-tight">Heartbeat</h1>
+        <p className="text-ink-soft mt-1 text-sm">
           A low-friction pulse. One tap to confirm you’re on plan — and a quiet nudge only when you
           drift from the work that mattered.
         </p>

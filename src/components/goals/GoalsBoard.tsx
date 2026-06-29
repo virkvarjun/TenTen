@@ -14,7 +14,7 @@ const TYPES: WorkType[] = ["deep", "shallow", "admin", "health", "social"];
 
 const PACING_STYLE: Record<GoalView["pacing"], string> = {
   behind: "bg-red-100 text-red-700 border-red-200",
-  "on-track": "bg-emerald-100 text-emerald-700 border-emerald-200",
+  "on-track": "bg-emerald-100 text-good border-emerald-200",
   ahead: "bg-sky-100 text-sky-700 border-sky-200",
 };
 
@@ -29,7 +29,7 @@ export function GoalsBoard({ goals }: { goals: GoalView[] }) {
     <div className="space-y-6">
       <AddGoalForm />
       {goals.length === 0 ? (
-        <Card className="text-center text-sm text-neutral-500">
+        <Card className="text-ink-soft text-center text-sm">
           No goals yet. Add a few above — they’re the source of truth for what your day is for.
         </Card>
       ) : (
@@ -79,7 +79,7 @@ function AddGoalForm() {
   return (
     <Card className="space-y-4">
       <div>
-        <label htmlFor="goal-title" className="mb-1 block text-xs font-medium text-neutral-600">
+        <label htmlFor="goal-title" className="text-ink-soft mb-1 block text-xs font-medium">
           What are you pursuing?
         </label>
         <input
@@ -89,20 +89,20 @@ function AddGoalForm() {
           onChange={(e) => setTitle(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && submit()}
           placeholder="e.g. Ship the v1 release"
-          className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:outline-none"
+          className="border-line focus-visible:ring-signal w-full rounded-lg border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:outline-none"
         />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
         <div>
-          <label htmlFor="goal-type" className="mb-1 block text-xs font-medium text-neutral-600">
+          <label htmlFor="goal-type" className="text-ink-soft mb-1 block text-xs font-medium">
             Type
           </label>
           <select
             id="goal-type"
             value={type}
             onChange={(e) => setType(e.target.value as WorkType)}
-            className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+            className="border-line w-full rounded-lg border px-3 py-2 text-sm"
           >
             {TYPES.map((t) => (
               <option key={t} value={t}>
@@ -113,7 +113,7 @@ function AddGoalForm() {
         </div>
         <WeightControl value={weight} onChange={setWeight} />
         <div>
-          <label htmlFor="goal-target" className="mb-1 block text-xs font-medium text-neutral-600">
+          <label htmlFor="goal-target" className="text-ink-soft mb-1 block text-xs font-medium">
             Hours / week
           </label>
           <input
@@ -124,7 +124,7 @@ function AddGoalForm() {
             step={0.5}
             value={target}
             onChange={(e) => setTarget(Number(e.target.value))}
-            className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+            className="border-line w-full rounded-lg border px-3 py-2 text-sm"
           />
         </div>
       </div>
@@ -170,7 +170,7 @@ function GoalRow({ goal }: { goal: GoalView }) {
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="font-medium text-neutral-900">{goal.title}</span>
+            <span className="text-ink font-medium">{goal.title}</span>
             <Badge type={goal.type}>{workTypeLabel(goal.type)}</Badge>
             <span
               className={cn(
@@ -182,13 +182,13 @@ function GoalRow({ goal }: { goal: GoalView }) {
             </span>
           </div>
           <div className="mt-2 flex items-center gap-3">
-            <div className="h-2 w-full max-w-xs overflow-hidden rounded-full bg-neutral-200">
+            <div className="bg-line h-2 w-full max-w-xs overflow-hidden rounded-full">
               <div
-                className="h-full rounded-full bg-neutral-900 transition-[width] duration-500"
+                className="bg-ink h-full rounded-full transition-[width] duration-500"
                 style={{ width: `${pct}%` }}
               />
             </div>
-            <span className="shrink-0 text-xs text-neutral-500 tabular-nums">
+            <span className="text-ink-soft shrink-0 text-xs tabular-nums">
               {formatHours(goal.progressHours)} / {formatHours(goal.targetHoursPerWeek)} · weight{" "}
               {goal.weight}
             </span>
@@ -205,10 +205,10 @@ function GoalRow({ goal }: { goal: GoalView }) {
       </div>
 
       {editing && (
-        <div className="mt-4 grid gap-4 border-t border-neutral-100 pt-4 sm:grid-cols-3">
+        <div className="border-line-soft mt-4 grid gap-4 border-t pt-4 sm:grid-cols-3">
           <WeightControl value={weight} onChange={setWeight} />
           <div>
-            <label className="mb-1 block text-xs font-medium text-neutral-600">Hours / week</label>
+            <label className="text-ink-soft mb-1 block text-xs font-medium">Hours / week</label>
             <input
               type="number"
               min={0}
@@ -216,13 +216,11 @@ function GoalRow({ goal }: { goal: GoalView }) {
               step={0.5}
               value={target}
               onChange={(e) => setTarget(Number(e.target.value))}
-              className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+              className="border-line w-full rounded-lg border px-3 py-2 text-sm"
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-neutral-600">
-              Progress (hours)
-            </label>
+            <label className="text-ink-soft mb-1 block text-xs font-medium">Progress (hours)</label>
             <input
               type="number"
               min={0}
@@ -230,7 +228,7 @@ function GoalRow({ goal }: { goal: GoalView }) {
               step={0.25}
               value={progress}
               onChange={(e) => setProgress(Number(e.target.value))}
-              className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+              className="border-line w-full rounded-lg border px-3 py-2 text-sm"
             />
           </div>
           <div className="flex justify-end sm:col-span-3">
@@ -247,8 +245,8 @@ function GoalRow({ goal }: { goal: GoalView }) {
 function WeightControl({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   return (
     <div>
-      <label className="mb-1 block text-xs font-medium text-neutral-600">
-        Priority weight <span className="text-neutral-400">({value})</span>
+      <label className="text-ink-soft mb-1 block text-xs font-medium">
+        Priority weight <span className="text-ink-faint">({value})</span>
       </label>
       <input
         type="range"
@@ -257,7 +255,7 @@ function WeightControl({ value, onChange }: { value: number; onChange: (v: numbe
         step={1}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full accent-neutral-900"
+        className="accent-signal w-full"
         aria-label="Priority weight"
       />
     </div>

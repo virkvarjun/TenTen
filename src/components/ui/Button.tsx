@@ -10,11 +10,10 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const VARIANTS: Record<Variant, string> = {
-  primary: "bg-neutral-900 text-white hover:bg-neutral-700 disabled:bg-neutral-300",
-  secondary:
-    "border border-neutral-300 bg-white text-neutral-900 hover:bg-neutral-50 disabled:opacity-50",
-  ghost: "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900",
-  danger: "text-red-600 hover:bg-red-50",
+  primary: "bg-ink text-canvas hover:bg-signal disabled:bg-ink-faint",
+  secondary: "border border-line bg-surface text-ink hover:border-ink-soft disabled:opacity-50",
+  ghost: "text-ink-soft hover:bg-line-soft hover:text-ink",
+  danger: "text-bad hover:bg-bad/10",
 };
 
 const SIZES: Record<Size, string> = {
@@ -31,8 +30,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       ref={ref}
       type={type}
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors",
-        "focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2 focus-visible:outline-none",
+        "inline-flex items-center justify-center gap-2 rounded-sm font-medium tracking-tight transition-colors duration-200",
+        "focus-visible:ring-signal focus-visible:ring-offset-canvas focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
         "disabled:cursor-not-allowed",
         VARIANTS[variant],
         SIZES[size],

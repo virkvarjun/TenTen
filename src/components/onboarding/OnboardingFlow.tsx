@@ -150,7 +150,7 @@ function Progress({ step }: { step: number }) {
           key={i}
           className={cn(
             "h-1 flex-1 rounded-full transition-colors",
-            i <= step ? "bg-indigo-500" : "bg-neutral-200",
+            i <= step ? "bg-signal" : "bg-line",
           )}
         />
       ))}
@@ -161,8 +161,8 @@ function Progress({ step }: { step: number }) {
 function StepHeader({ title, subtitle }: { title: string; subtitle: string }) {
   return (
     <div className="mb-6">
-      <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">{title}</h1>
-      <p className="mt-2 text-sm leading-relaxed text-neutral-600">{subtitle}</p>
+      <h1 className="text-ink text-2xl font-semibold tracking-tight">{title}</h1>
+      <p className="text-ink-soft mt-2 text-sm leading-relaxed">{subtitle}</p>
     </div>
   );
 }
@@ -170,12 +170,12 @@ function StepHeader({ title, subtitle }: { title: string; subtitle: string }) {
 function Welcome() {
   return (
     <div>
-      <p className="mb-2 text-sm font-medium tracking-widest text-indigo-500 uppercase">Meridian</p>
+      <p className="text-signal mb-2 text-sm font-medium tracking-widest uppercase">Meridian</p>
       <StepHeader
         title="Let’s tune Meridian to you."
         subtitle="Two minutes. We’ll learn when your energy peaks, how much deep focus a good day holds, and what actually matters to you — so your very first day already feels like yours, not a template."
       />
-      <p className="text-sm text-neutral-500">
+      <p className="text-ink-soft text-sm">
         Everything here is a starting point. Meridian keeps learning from what you actually do.
       </p>
     </div>
@@ -217,17 +217,15 @@ function ChronotypeStep({
             onClick={() => onChange(c.value)}
             className={cn(
               "w-full rounded-xl border p-4 text-left transition-colors",
-              value === c.value
-                ? "border-indigo-500 bg-indigo-50"
-                : "border-neutral-200 hover:border-neutral-300",
+              value === c.value ? "border-signal bg-signal-weak" : "border-line hover:border-line",
             )}
           >
-            <div className="font-medium text-neutral-900">{c.label}</div>
-            <div className="text-sm text-neutral-600">{c.blurb}</div>
+            <div className="text-ink font-medium">{c.label}</div>
+            <div className="text-ink-soft text-sm">{c.blurb}</div>
           </button>
         ))}
       </div>
-      <p className="mt-4 text-xs text-neutral-500">
+      <p className="text-ink-soft mt-4 text-xs">
         Not sure? “In between” is a safe default — the curve will sharpen as Meridian learns you.
       </p>
     </div>
@@ -241,10 +239,10 @@ function CeilingStep({ value, onChange }: { value: number; onChange: (v: number)
         title="How many genuinely focused hours does a good day hold?"
         subtitle="Not hours at a desk — hours of real, undistracted depth. For almost everyone that’s four to six. The cap is the feature: protect those hours and the rest of the day gets easier."
       />
-      <div className="rounded-xl border border-neutral-200 p-6">
+      <div className="border-line rounded-xl border p-6">
         <div className="mb-4 text-center">
-          <span className="text-4xl font-semibold text-neutral-900">{value}</span>
-          <span className="ml-1 text-neutral-500">hours / day</span>
+          <span className="text-ink text-4xl font-semibold">{value}</span>
+          <span className="text-ink-soft ml-1">hours / day</span>
         </div>
         <input
           type="range"
@@ -253,10 +251,10 @@ function CeilingStep({ value, onChange }: { value: number; onChange: (v: number)
           step={1}
           value={value}
           onChange={(e) => onChange(Number(e.target.value))}
-          className="w-full accent-indigo-500"
+          className="accent-signal w-full"
           aria-label="Deep-work ceiling"
         />
-        <div className="mt-1 flex justify-between text-xs text-neutral-400">
+        <div className="text-ink-faint mt-1 flex justify-between text-xs">
           <span>4 — protective</span>
           <span>6 — ambitious</span>
         </div>
@@ -310,7 +308,7 @@ function GoalsStep({
               key={g.title}
               type="button"
               onClick={() => onChange([...goals, g])}
-              className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs text-neutral-600 hover:bg-neutral-100"
+              className="border-line bg-canvas text-ink-soft hover:bg-line-soft rounded-full border px-3 py-1 text-xs"
             >
               + {g.title}
             </button>
@@ -322,12 +320,12 @@ function GoalsStep({
         {goals.map((g, i) => (
           <li
             key={`${g.title}-${i}`}
-            className="flex items-center gap-2 rounded-lg border border-neutral-200 p-3"
+            className="border-line flex items-center gap-2 rounded-lg border p-3"
           >
-            <span className="w-5 text-center text-xs font-semibold text-neutral-400">{i + 1}</span>
+            <span className="text-ink-faint w-5 text-center text-xs font-semibold">{i + 1}</span>
             <div className="min-w-0 flex-1">
-              <div className="truncate text-sm font-medium text-neutral-900">{g.title}</div>
-              <div className="text-xs text-neutral-500">
+              <div className="text-ink truncate text-sm font-medium">{g.title}</div>
+              <div className="text-ink-soft text-xs">
                 {workTypeLabel(g.type)} · {g.targetHoursPerWeek}h/wk
               </div>
             </div>
@@ -335,7 +333,7 @@ function GoalsStep({
               type="button"
               onClick={() => move(i, -1)}
               disabled={i === 0}
-              className="px-1 text-neutral-400 hover:text-neutral-700 disabled:opacity-30"
+              className="text-ink-faint hover:text-ink px-1 disabled:opacity-30"
               aria-label="Move up"
             >
               ↑
@@ -344,7 +342,7 @@ function GoalsStep({
               type="button"
               onClick={() => move(i, 1)}
               disabled={i === goals.length - 1}
-              className="px-1 text-neutral-400 hover:text-neutral-700 disabled:opacity-30"
+              className="text-ink-faint hover:text-ink px-1 disabled:opacity-30"
               aria-label="Move down"
             >
               ↓
@@ -368,12 +366,12 @@ function GoalsStep({
             onChange={(e) => setTitle(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && add()}
             placeholder="Add a goal"
-            className="rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+            className="border-line rounded-lg border px-3 py-2 text-sm"
           />
           <select
             value={type}
             onChange={(e) => setType(e.target.value as WorkType)}
-            className="rounded-lg border border-neutral-300 px-2 py-2 text-sm"
+            className="border-line rounded-lg border px-2 py-2 text-sm"
             aria-label="Goal type"
           >
             {TYPES.map((t) => (
@@ -388,7 +386,7 @@ function GoalsStep({
             max={40}
             value={hours}
             onChange={(e) => setHours(Number(e.target.value))}
-            className="w-16 rounded-lg border border-neutral-300 px-2 py-2 text-sm"
+            className="border-line w-16 rounded-lg border px-2 py-2 text-sm"
             aria-label="Hours per week"
           />
           <Button size="sm" onClick={add}>
@@ -397,7 +395,7 @@ function GoalsStep({
         </div>
       )}
       {goals.length < 3 && (
-        <p className="mt-3 text-xs text-neutral-500">Add at least three to continue.</p>
+        <p className="text-ink-soft mt-3 text-xs">Add at least three to continue.</p>
       )}
     </div>
   );
@@ -435,12 +433,12 @@ function WorkStep({
             suffix=":00"
           />
         </div>
-        <label className="flex items-center gap-3 text-sm text-neutral-700">
+        <label className="text-ink flex items-center gap-3 text-sm">
           <input
             type="checkbox"
             checked={answers.inOffice}
             onChange={(e) => set("inOffice", e.target.checked)}
-            className="h-4 w-4 accent-indigo-500"
+            className="accent-signal h-4 w-4"
           />
           I commute to an office on a typical day
         </label>
@@ -478,7 +476,7 @@ function NumberField({
 }) {
   return (
     <div>
-      <label className="mb-1 block text-xs font-medium text-neutral-600">{label}</label>
+      <label className="text-ink-soft mb-1 block text-xs font-medium">{label}</label>
       <div className="flex items-center gap-1">
         <input
           type="number"
@@ -487,9 +485,9 @@ function NumberField({
           step={step}
           value={value}
           onChange={(e) => onChange(Number(e.target.value))}
-          className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+          className="border-line w-full rounded-lg border px-3 py-2 text-sm"
         />
-        {suffix && <span className="text-sm text-neutral-400">{suffix}</span>}
+        {suffix && <span className="text-ink-faint text-sm">{suffix}</span>}
       </div>
     </div>
   );
@@ -510,12 +508,12 @@ function CalendarStep({ configured }: { configured: boolean }) {
           Connect Google Calendar
         </Button>
       ) : (
-        <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-4 text-sm text-neutral-600">
+        <div className="border-line bg-canvas text-ink-soft rounded-xl border p-4 text-sm">
           Calendar sync isn’t configured in this environment yet. You can skip this — Meridian works
           on its own, and you can connect later from settings.
         </div>
       )}
-      <p className="mt-4 text-xs text-neutral-500">
+      <p className="text-ink-soft mt-4 text-xs">
         You’re one step from your first day. Skip if you’d rather connect later.
       </p>
     </div>
