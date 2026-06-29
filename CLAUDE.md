@@ -155,5 +155,13 @@ var is absent (the app always runs).
   focus work actually happened, plus follow-through stats. Triggered by Vercel Cron
   (`vercel.json`, 05:00 daily), protected by `CRON_SECRET`, idempotent per day.
 
-**Next: Phase 4** — onboarding that seeds a good day-one model (chronotype, ceiling,
-goals, work pattern, calendar) so the app isn't generic on first run.
+**Phase 4 — complete.** Onboarding (`/onboarding`, `OnboardingFlow.tsx`): a
+six-step warm flow (welcome → chronotype → deep-work ceiling → goal portfolio with
+drag-to-rank → work/commute pattern → connect calendar → reveal Today). Each step
+writes to the model via incremental server actions (`onboard*Action`); progress is
+persisted to `localStorage` so it's resumable, and re-runnable from the header
+"Recalibrate" link. Ends by rendering the seeded Today view. Calendar step
+degrades when Google isn't configured.
+
+**Next: Phase 5** — a distinctive design language + deliberate motion (the energy
+curve as the signature/hero), replacing the quiet placeholder styling.
