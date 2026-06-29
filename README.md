@@ -1,0 +1,95 @@
+# Meridian
+
+**An operating system for your attention.**
+
+Meridian learns your personal energy curve and your follow-through, spends a
+hard-capped deep-work budget (4–6 hours/day) on your highest-weight goals during
+your peak hours, and routes everything else to your troughs. When an ask comes in —
+_"a friend wants to run at 4"_ — it reasons about your goals, your energy, and your
+remaining budget at once, and gets sharper about you every week.
+
+## The thesis
+
+Most productivity tools treat every hour as interchangeable and every task as
+equally schedulable. They are not. Your capacity for deep work is finite (a few
+genuinely focused hours a day) and it is unevenly distributed across the day. The
+calendar sync and the interval check-in are plumbing. **The product is the
+energy-aware decision engine** — the thing that knows a 4pm run is cheap in your
+post-lunch trough but a 9am run would cost you the morning peak a behind-target
+deep goal needs.
+
+## Screenshots
+
+> _Coming in Phase 5 (design + motion pass)._
+>
+> - Today — the energy curve with planned blocks and the deep-work budget meter
+> - Events — an incoming ask resolved into a verdict + rationale
+
+## Local setup
+
+Prerequisites: **Node 20.19+ / 22.12+ / 24+**, **pnpm**, and **Docker** (for local
+Postgres).
+
+```bash
+pnpm install
+
+# Start local Postgres (docker-compose)
+pnpm db:up
+
+# Configure environment
+cp .env.example .env.local   # then fill in values (see table below)
+
+# Generate the Prisma client
+pnpm prisma:generate
+
+# Run the app
+pnpm dev
+```
+
+Open <http://localhost:3000>.
+
+> Every integration degrades gracefully if its key is missing: without
+> `ANTHROPIC_API_KEY` the app uses the deterministic heuristic engine; without
+> Google credentials it falls back to mock calendar data.
+
+## Environment variables
+
+| Variable               | Required       | Purpose                                                      |
+| ---------------------- | -------------- | ------------------------------------------------------------ |
+| `DATABASE_URL`         | Yes            | Postgres connection string (docker-compose default provided) |
+| `ANTHROPIC_API_KEY`    | No (heuristic) | Enables the Claude-powered decision engine (else heuristic)  |
+| `NEXTAUTH_SECRET`      | For auth       | Auth.js session secret (`openssl rand -base64 32`)           |
+| `GOOGLE_CLIENT_ID`     | For calendar   | Google OAuth client ID (sign-in + Calendar scopes)           |
+| `GOOGLE_CLIENT_SECRET` | For calendar   | Google OAuth client secret                                   |
+| `CRON_SECRET`          | For cron       | Shared secret authenticating the nightly learning route      |
+
+Copy `.env.example` → `.env.local` and fill in real values. `.env.local` is
+gitignored; secrets never enter the repo.
+
+## Scripts
+
+| Script                   | Purpose                           |
+| ------------------------ | --------------------------------- |
+| `pnpm dev`               | Dev server                        |
+| `pnpm build` / `start`   | Production build / serve          |
+| `pnpm typecheck`         | `tsc --noEmit`                    |
+| `pnpm lint`              | ESLint (flat config)              |
+| `pnpm format`            | Prettier write                    |
+| `pnpm test`              | Vitest unit + component tests     |
+| `pnpm test:e2e`          | Playwright E2E                    |
+| `pnpm db:up` / `db:down` | Local Postgres via docker-compose |
+| `pnpm prisma:generate`   | Generate the Prisma client        |
+| `pnpm prisma:migrate`    | Run a dev migration               |
+| `pnpm prisma:studio`     | Open Prisma Studio                |
+
+## Architecture
+
+See [`CLAUDE.md`](./CLAUDE.md) for the domain glossary, conventions, and the
+load-bearing seam (pure domain logic; one `DecisionEngine` interface shared by the
+heuristic and LLM engines). Built with Next.js 15, TypeScript (strict), Tailwind v4,
+Prisma + Postgres, Auth.js v5, and the Anthropic SDK. Deploys to Vercel.
+
+## Status
+
+Phase 1 (scaffold) complete. V1 on mock data is next. Build progresses in phases —
+see `CLAUDE.md` → _Current status_.

@@ -1,0 +1,14 @@
+// Meridian database schema.
+//
+// Phase 1: datasource + generator only. The data model (User, Goal,
+// EnergyProfile, DeepWorkBudget, Block, Ask, CheckIn) lands in Phase 2/3 and
+// maps onto the canonical domain types in src/domain/types.ts.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
