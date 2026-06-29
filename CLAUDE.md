@@ -130,7 +130,30 @@ engine. No external calls anywhere.
 The engine seam is live: `decide()` in `src/server/decision/engine.ts` is the only
 thing surfaces call; swapping in the LLM engine touches nothing else.
 
-**Next: Phase 3** — LLM decision engine (behind the same interface, with Zod
-validation + heuristic fallback), Google Calendar OAuth, Prisma/Postgres
-persistence, and the nightly Vercel-Cron learning loop. Each integration degrades
-gracefully when its env var is absent.
+**Phase 3 — complete.** Real integrations, each degrading gracefully when its env
+var is absent (the app always runs).
+
+- **LLM decision engine** (`src/server/decision/llm.ts`): Claude (`claude-opus-4-8`)
+  behind the same `Decision` contract. The factory (`engine.ts`) picks LLM when
+  `ANTHROPIC_API_KEY` is set, else heuristic. Free/busy + budget math is computed
+  deterministically in code and handed to the model as facts; the model only
+  reasons. Output is constrained to JSON and validated with the Zod
+  `llmDecisionSchema`; on parse/validation/API failure it retries once, then the
+  factory falls back to the heuristic engine. Unvalidated output never reaches the
+  UI.
+- **Google Calendar** (`src/auth.ts` + `src/server/calendar/google.ts`): Auth.js v5
+  Google provider with `calendar.readonly` + `calendar.events` scopes (configured
+  only when Google creds exist). The Calendar service reads the day's events as
+  fixed blocks, writes accepted asks as events, and deletes them for undo — writes
+  always behind an explicit in-app confirm (caller-enforced).
+- **Persistence** (`prisma/schema.prisma`): full Postgres schema — Auth.js tables +
+  Goal/EnergyProfile/DeepWorkBudget/Block/Ask/CheckIn mapping the domain types.
+  The running demo still uses the in-memory `store.ts` (active default); the schema
+  is the migration target when `DATABASE_URL` is configured.
+- **Learning loop** (`src/domain/learning/learning.ts` + `/api/cron/learn`):
+  conservative exponential-smoothing nudge of the energy curve toward hours where
+  focus work actually happened, plus follow-through stats. Triggered by Vercel Cron
+  (`vercel.json`, 05:00 daily), protected by `CRON_SECRET`, idempotent per day.
+
+**Next: Phase 4** — onboarding that seeds a good day-one model (chronotype, ceiling,
+goals, work pattern, calendar) so the app isn't generic on first run.
