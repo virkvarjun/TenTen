@@ -15,6 +15,13 @@ import { atHour, startOfDay } from "@/domain/time";
 
 export const DEMO_USER_ID = "demo-user";
 
+/**
+ * How far through the week the demo is pinned at. Used consistently by the
+ * scheduler and the pacing display so "behind/on-track/ahead" lines up with how
+ * the day was laid out.
+ */
+export const DEMO_WEEK_FRACTION = 0.4;
+
 export function seedGoals(): Goal[] {
   return [
     {
@@ -149,7 +156,7 @@ export function seedDay(referenceDay: Date): SeededDay {
     energy,
     budget,
     fixedBlocks,
-    weekFraction: 0.4,
+    weekFraction: DEMO_WEEK_FRACTION,
   });
 
   return {

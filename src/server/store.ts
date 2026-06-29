@@ -11,7 +11,7 @@ import type {
 import { buildSchedule } from "@/domain/scheduler/scheduler";
 import { createBudget } from "@/domain/budget/budget";
 import { atHour, hourOf, startOfDay } from "@/domain/time";
-import { seedDay } from "@/server/mock/seed";
+import { seedDay, DEMO_WEEK_FRACTION } from "@/server/mock/seed";
 import type { AskRecord, DaySnapshot } from "@/server/types";
 
 /**
@@ -68,7 +68,7 @@ function replan(s: DayState): void {
     energy: s.energy,
     budget: createBudget(s.ceilingHours),
     fixedBlocks: s.fixedBlocks,
-    weekFraction: 0.4,
+    weekFraction: DEMO_WEEK_FRACTION,
   });
   s.plannedBlocks = plannedBlocks;
   s.budget = budget;
