@@ -301,9 +301,9 @@ function GoalsStep({
         subtitle="Add three to six. Order them by what matters most — the one on top gets first claim on your peak hours."
       />
 
-      {goals.length === 0 && (
+      {goals.length < 6 && (
         <div className="mb-4 flex flex-wrap gap-2">
-          {EXAMPLE_GOALS.map((g) => (
+          {EXAMPLE_GOALS.filter((e) => !goals.some((g) => g.title === e.title)).map((g) => (
             <button
               key={g.title}
               type="button"

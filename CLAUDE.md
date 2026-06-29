@@ -182,5 +182,40 @@ degrades when Google isn't configured.
   control, designed empty/error copy, consistent action vocabulary.
 - Screenshots in `docs/screenshots/` (generated via Playwright).
 
-**Next: Phase 6** — the test suite: domain unit tests, the LLM output contract,
-key API routes, component tests, and an E2E happy path; CI on every push.
+**Phase 6 — complete.** The test suite (all external services mocked).
+
+- **Unit (Vitest)** — `tests/domain/`: energy (match scores, peak/trough,
+  chronotypes), budget (allocation + the hard 4–6h refusal), scheduler (deep on
+  peaks, admin in troughs, fixed respected, budget cap), the heuristic engine
+  (table-driven accept/defer/decline incl. the canonical "run at 4 in the trough
+  while a behind deep goal owns the morning peak"), learning, and the Zod schema
+  (valid parses + malformed rejected).
+- **Integration (Vitest + mocks)** — `tests/integration/`: the engine factory with
+  the Anthropic SDK mocked (valid JSON → verdict; garbage → retry once → heuristic
+  fallback; never surfaces unvalidated output); the Calendar layer with `fetch`
+  mocked (events merge; write returns an id; undo deletes; refuses when not
+  connected); the learning loop over the store (conservative drift + idempotent
+  re-run) and goal CRUD.
+- **Component (Testing Library)** — `tests/components/`: Goals CRUD + pacing,
+  Heartbeat silent-vs-nudge, Events composer → verdict card.
+- **E2E (Playwright)** — `e2e/`: the happy path (onboarding → seeded Today → create
+  a goal → submit an ask → accept → block appears) and a reduced-motion usability
+  pass.
+- **CI** — `.github/workflows/ci.yml`: typecheck (fails on type errors) + lint +
+  unit/integration + build on every push; Playwright on PRs.
+- Test DB strategy: integration tests run against the in-memory store seeded by
+  `seedDay` (no live DB needed); factories live in `tests/factories.ts`; the Prisma
+  schema is validated by `prisma generate` in CI.
+
+## Running the tests
+
+| Command                       | What it runs                                             |
+| ----------------------------- | -------------------------------------------------------- |
+| `pnpm test`                   | Vitest unit + integration + component (67 tests)         |
+| `pnpm test:watch`             | Vitest in watch mode                                     |
+| `pnpm test:e2e`               | Playwright E2E (boots the dev server; add `--workers=1`) |
+| `pnpm typecheck && pnpm lint` | The gates CI enforces                                    |
+
+**All six phases complete.** The app runs end-to-end for free on the heuristic
+engine + mock calendar, and lights up the LLM + Google Calendar + Postgres when
+their env vars are present.

@@ -105,7 +105,22 @@ load-bearing seam (pure domain logic; one `DecisionEngine` interface shared by t
 heuristic and LLM engines). Built with Next.js 15, TypeScript (strict), Tailwind v4,
 Prisma + Postgres, Auth.js v5, and the Anthropic SDK. Deploys to Vercel.
 
+## Testing
+
+```bash
+pnpm test          # Vitest: domain units, LLM contract, calendar, components (67 tests)
+pnpm test:e2e      # Playwright: onboarding → ask → accept happy path + reduced-motion
+pnpm typecheck && pnpm lint
+```
+
+External services are mocked throughout (Anthropic SDK, Google `fetch`); the suite
+needs no API keys and no live database. CI (`.github/workflows/ci.yml`) runs
+typecheck + lint + tests + build on every push and Playwright on PRs.
+
 ## Status
 
-Phase 1 (scaffold) complete. V1 on mock data is next. Build progresses in phases —
-see `CLAUDE.md` → _Current status_.
+All six build phases complete — scaffold, V1 on mock data with the heuristic
+engine, real integrations (Claude + Google Calendar + Postgres + nightly learning
+cron), onboarding, the design language + motion pass, and the test suite. The app
+runs end-to-end for free on the heuristic engine and lights up the LLM and calendar
+when their env vars are present. See `CLAUDE.md` → _Current status_ for the detail.
