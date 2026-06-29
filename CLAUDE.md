@@ -43,7 +43,8 @@ suggestedSlot, displaces, rationale }`. `verdict` is `accept` | `defer` |
 ## Stack
 
 - **Next.js 15** (App Router) + **TypeScript** strict
-- **Tailwind CSS v4** + a custom component layer (shadcn primitives only — Phase 5)
+- **Tailwind CSS v4** + a custom, token-driven component layer (hand-built
+  primitives in `src/components/ui`; no stock shadcn)
 - **Motion** (`framer-motion`) for animation
 - **Auth.js (NextAuth v5 beta)** with the Google provider (sign-in + Calendar OAuth)
 - **Prisma 6** + **Postgres** (Docker locally, Neon/Supabase in cloud)
