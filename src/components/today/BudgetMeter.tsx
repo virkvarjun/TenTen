@@ -14,10 +14,7 @@ export function BudgetMeter({ budget }: { budget: DeepWorkBudget }) {
       <div className="mb-2 flex items-baseline justify-between">
         <span className="text-sm font-semibold text-neutral-900">Deep-work budget</span>
         <span
-          className={cn(
-            "text-sm font-medium",
-            exhausted ? "text-amber-600" : "text-neutral-600",
-          )}
+          className={cn("text-sm font-medium", exhausted ? "text-amber-600" : "text-neutral-600")}
         >
           {exhausted ? "Spent for today" : `${formatHours(left)} left`}
         </span>

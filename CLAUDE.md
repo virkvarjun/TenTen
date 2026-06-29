@@ -103,12 +103,34 @@ e2e/                    Playwright E2E (Phase 6).
 
 ## Current status
 
-**Phase 1 — complete.** Scaffold + docs. Next.js 15 + TS strict, Tailwind v4,
-ESLint flat config (with the domain-purity import rule), Prettier, Vitest +
-Playwright wired, Prisma 6 with an empty schema + docker-compose Postgres,
-`framer-motion` / `@anthropic-ai/sdk` / `zod` / `next-auth` installed but not yet
-wired. Canonical domain types established in `src/domain/types.ts`. Build, lint,
-typecheck, and tests are green.
+**Phase 1 — complete.** Scaffold + docs (see git history).
 
-**Next: Phase 2** — full V1 on mock data with a deterministic heuristic decision
-engine; the four surfaces (Today, Goals, Heartbeat, Events).
+**Phase 2 — complete.** Full V1 on mock data with the deterministic heuristic
+engine. No external calls anywhere.
+
+- **Domain logic** (`src/domain`, pure): `energy/` (chronotype curves, match
+  scores, peak/trough windows), `budget/` (allocation with the hard 4–6h refusal),
+  `goals/` (pacing + contention ranking), `scheduler/` (lays deep work onto peaks,
+  shallow/admin into troughs, respects fixed blocks, stops at budget),
+  `decision-engine/` (heuristic engine + the Zod output schema), `time.ts`.
+- **Server layer** (`src/server`): an in-memory `store.ts` seeded from
+  `mock/seed.ts` (6 goals across all types, neutral curve, 5h budget, two fixed
+  commitments, a half-planned day); `ask-parser.ts` (NL → `Ask`);
+  `decision/engine.ts` (the factory — heuristic today, LLM-swappable in Phase 3);
+  thin `actions.ts` server actions; `view.ts` view-model builders.
+- **Surfaces** (`src/app/(app)`): **Today** (the signature SVG energy curve with
+  blocks laid beneath, current-hour marker, budget meter, ordered day list),
+  **Goals** (CRUD with weight slider, type, weekly target, live progress, pacing),
+  **Heartbeat** (one-tap check-in, silent unless a deep block is drifting),
+  **Events** (NL composer → verdict card with rationale + slot + displaces → accept
+  rebalances the day; undoable; history).
+- **UI primitives** in `src/components/ui` (Button, Card, Badge) — deliberately
+  quiet; Phase 5 gives them a real design language.
+
+The engine seam is live: `decide()` in `src/server/decision/engine.ts` is the only
+thing surfaces call; swapping in the LLM engine touches nothing else.
+
+**Next: Phase 3** — LLM decision engine (behind the same interface, with Zod
+validation + heuristic fallback), Google Calendar OAuth, Prisma/Postgres
+persistence, and the nightly Vercel-Cron learning loop. Each integration degrades
+gracefully when its env var is absent.

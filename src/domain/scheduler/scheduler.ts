@@ -1,10 +1,5 @@
 import type { Block, DeepWorkBudget, EnergyProfile, Goal, WorkType } from "@/domain/types";
-import {
-  DAY_END_HOUR,
-  DAY_START_HOUR,
-  energyMatchScore,
-  energyAt,
-} from "@/domain/energy/energy";
+import { DAY_END_HOUR, DAY_START_HOUR, energyMatchScore, energyAt } from "@/domain/energy/energy";
 import { allocateDeepWork, remainingHours } from "@/domain/budget/budget";
 import { dailyTargetHours, rankByContention } from "@/domain/goals/goals";
 import { atHour, hourOf } from "@/domain/time";

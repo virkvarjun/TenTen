@@ -18,7 +18,13 @@ export interface CheckInView {
 }
 
 export interface HeartbeatPanelProps {
-  current: { label: string; type: WorkType; startHour: number; endHour: number; blockId: string } | null;
+  current: {
+    label: string;
+    type: WorkType;
+    startHour: number;
+    endHour: number;
+    blockId: string;
+  } | null;
   drifting: boolean;
   recent: CheckInView[];
 }
@@ -58,7 +64,10 @@ export function HeartbeatPanel({ current, drifting, recent }: HeartbeatPanelProp
           role="status"
           className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"
         >
-          <span aria-hidden className="mt-0.5 inline-block h-2 w-2 shrink-0 rounded-full bg-amber-500" />
+          <span
+            aria-hidden
+            className="mt-0.5 inline-block h-2 w-2 shrink-0 rounded-full bg-amber-500"
+          />
           <p>
             You set aside this hour for <strong>{current.label}</strong>, but your last check-in
             logged something else. No judgement — just a nudge. Want to get back to it, or re-plan?
@@ -135,7 +144,7 @@ export function HeartbeatPanel({ current, drifting, recent }: HeartbeatPanelProp
           <ul className="space-y-2">
             {recent.map((c) => (
               <li key={c.id} className="flex items-center gap-3 text-sm">
-                <span className="w-16 tabular-nums text-neutral-500">{formatHour(c.hour)}</span>
+                <span className="w-16 text-neutral-500 tabular-nums">{formatHour(c.hour)}</span>
                 <Badge type={c.actualType}>{workTypeLabel(c.actualType)}</Badge>
                 {c.note && <span className="text-neutral-600">{c.note}</span>}
               </li>

@@ -9,10 +9,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-5">
           <div className="flex items-center gap-6">
             <Link href="/today" className="flex items-center gap-2">
-              <span
-                aria-hidden
-                className="inline-block h-2.5 w-2.5 rounded-full bg-indigo-500"
-              />
+              <span aria-hidden className="inline-block h-2.5 w-2.5 rounded-full bg-indigo-500" />
               <span className="text-sm font-semibold tracking-tight">Meridian</span>
             </Link>
             <Nav />

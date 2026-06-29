@@ -1,4 +1,12 @@
-import type { Ask, Block, CheckIn, Decision, EnergyProfile, Goal, DeepWorkBudget } from "@/domain/types";
+import type {
+  Ask,
+  Block,
+  CheckIn,
+  Decision,
+  EnergyProfile,
+  Goal,
+  DeepWorkBudget,
+} from "@/domain/types";
 
 /** A submitted ask plus the engine's decision and the user's response to it. */
 export interface AskRecord {

@@ -69,7 +69,7 @@ export default function TodayPage() {
                 .map((block) => (
                   <li key={block.id} className="flex items-center justify-between gap-3 text-sm">
                     <div className="flex items-center gap-2">
-                      <span className="w-20 tabular-nums text-neutral-500">
+                      <span className="w-20 text-neutral-500 tabular-nums">
                         {formatHourRange(block.startHour, block.endHour)}
                       </span>
                       <span className="font-medium text-neutral-900">{block.label}</span>

@@ -59,8 +59,7 @@ export function EnergyCurve({
   const plotW = W - PAD_X * 2;
 
   const xFor = (hour: number) => PAD_X + ((hour - startHour) / span) * plotW;
-  const yFor = (energy: number) =>
-    CURVE_BOTTOM - clamp01(energy) * (CURVE_BOTTOM - CURVE_TOP);
+  const yFor = (energy: number) => CURVE_BOTTOM - clamp01(energy) * (CURVE_BOTTOM - CURVE_TOP);
 
   const points: Array<{ x: number; y: number }> = [];
   for (let h = startHour; h <= endHour; h++) {
@@ -169,14 +168,7 @@ export function EnergyCurve({
 
       {/* hour axis */}
       {hourTicks(startHour, endHour).map((h) => (
-        <text
-          key={h}
-          x={xFor(h)}
-          y={AXIS_Y}
-          fontSize={11}
-          fill="#737373"
-          textAnchor="middle"
-        >
+        <text key={h} x={xFor(h)} y={AXIS_Y} fontSize={11} fill="#737373" textAnchor="middle">
           {formatHour(h)}
         </text>
       ))}

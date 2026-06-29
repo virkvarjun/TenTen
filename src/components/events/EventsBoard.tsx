@@ -111,12 +111,18 @@ export function EventsBoard({ history }: { history: AskHistoryView[] }) {
         <h2 className="mb-3 text-sm font-semibold text-neutral-900">Earlier decisions</h2>
         {history.length === 0 ? (
           <p className="text-sm text-neutral-500">
-            No asks yet. Try one of the examples — you’ll get a verdict with the reasoning behind it.
+            No asks yet. Try one of the examples — you’ll get a verdict with the reasoning behind
+            it.
           </p>
         ) : (
           <div className="space-y-2">
             {history.map((h) => (
-              <HistoryRow key={h.id} item={h} busy={pending} onUndo={() => start(() => undoAskAction(h.id))} />
+              <HistoryRow
+                key={h.id}
+                item={h}
+                busy={pending}
+                onUndo={() => start(() => undoAskAction(h.id))}
+              />
             ))}
           </div>
         )}
@@ -161,7 +167,10 @@ function ResultCard({
   const { decision, parsed, engine } = result;
   const style = VERDICT_STYLE[decision.verdict];
   const slot = decision.suggestedSlot
-    ? { startHour: hourOf(new Date(decision.suggestedSlot.start)), endHour: hourOf(new Date(decision.suggestedSlot.end)) }
+    ? {
+        startHour: hourOf(new Date(decision.suggestedSlot.start)),
+        endHour: hourOf(new Date(decision.suggestedSlot.end)),
+      }
     : null;
 
   return (
@@ -171,7 +180,8 @@ function ResultCard({
           {style.label}
         </span>
         <span className="text-xs text-neutral-500">
-          {engine === "llm" ? "Claude" : "Heuristic engine"} · {formatHours(parsed.durationMin / 60)}
+          {engine === "llm" ? "Claude" : "Heuristic engine"} ·{" "}
+          {formatHours(parsed.durationMin / 60)}
         </span>
       </div>
 
@@ -189,9 +199,7 @@ function ResultCard({
       )}
 
       {decision.displaces.length > 0 && (
-        <p className="mt-1 text-xs text-neutral-500">
-          Would move: {decision.displaces.join(", ")}
-        </p>
+        <p className="mt-1 text-xs text-neutral-500">Would move: {decision.displaces.join(", ")}</p>
       )}
 
       <div className="mt-4 flex gap-2">

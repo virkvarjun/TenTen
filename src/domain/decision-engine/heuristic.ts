@@ -35,7 +35,19 @@ const TROUGH_THRESHOLD = 0.45;
 /** Infer the kind of activity an ask represents from its wording. */
 export function inferAskType(description: string): WorkType {
   const text = description.toLowerCase();
-  const health = ["run", "gym", "lift", "workout", "work out", "walk", "yoga", "climb", "swim", "ride", "bike"];
+  const health = [
+    "run",
+    "gym",
+    "lift",
+    "workout",
+    "work out",
+    "walk",
+    "yoga",
+    "climb",
+    "swim",
+    "ride",
+    "bike",
+  ];
   const deep = ["deep work", "focus", "write", "code", "design review", "study"];
   if (health.some((w) => text.includes(w))) return "health";
   if (deep.some((w) => text.includes(w))) return "deep";
@@ -70,7 +82,8 @@ function bestTroughSlot(
 function meanEnergy(energy: EnergyProfile, startHour: number, durHours: number): number {
   const span = Math.max(1, Math.round(durHours));
   let sum = 0;
-  for (let h = Math.floor(startHour); h < Math.floor(startHour) + span; h++) sum += energyAt(energy, h);
+  for (let h = Math.floor(startHour); h < Math.floor(startHour) + span; h++)
+    sum += energyAt(energy, h);
   return sum / span;
 }
 
@@ -141,9 +154,7 @@ export function heuristicDecision(context: DecisionContext): Decision {
           asSlot(day, alt.startHour, durHours),
           `${fmtHour(startHour)} is one of your peak hours, and ${goalName} is ${hoursBehind(
             topGoal!,
-          ).toFixed(
-            1,
-          )}h behind pace — that focus time is too valuable to spend here. ${fmtHour(
+          ).toFixed(1)}h behind pace — that focus time is too valuable to spend here. ${fmtHour(
             alt.startHour,
           )} falls in your dip, where this fits without costing you anything.`,
         );
