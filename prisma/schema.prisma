@@ -1,8 +1,11 @@
 // Meridian database schema.
 //
-// Phase 1: datasource + generator only. The data model (User, Goal,
-// EnergyProfile, DeepWorkBudget, Block, Ask, CheckIn) lands in Phase 2/3 and
-// maps onto the canonical domain types in src/domain/types.ts.
+// Maps the canonical domain types (src/domain/types.ts) onto Postgres, plus the
+// Auth.js (NextAuth) tables for Google sign-in + Calendar OAuth tokens.
+//
+// The running demo uses the in-memory store (src/server/store.ts); this schema
+// is the persistence target the data-access layer migrates onto when
+// DATABASE_URL is configured.
 
 generator client {
   provider = "prisma-client-js"
@@ -11,4 +14,163 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+// --- Auth.js (NextAuth) ---------------------------------------------------
+
+model User {
+  id            String         @id @default(cuid())
+  name          String?
+  email         String?        @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  goals         Goal[]
+  energyProfile EnergyProfile?
+  budget        DeepWorkBudget?
+  blocks        Block[]
+  asks          Ask[]
+  checkIns      CheckIn[]
+  createdAt     DateTime       @default(now())
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// --- Domain ---------------------------------------------------------------
+
+enum WorkType {
+  deep
+  shallow
+  admin
+  health
+  social
+}
+
+enum GoalStatus {
+  active
+  paused
+  archived
+}
+
+enum BlockSource {
+  planned
+  fixed
+}
+
+enum Chronotype {
+  lark
+  neutral
+  owl
+}
+
+model Goal {
+  id                 String     @id @default(cuid())
+  userId             String
+  title              String
+  weight             Float
+  type               WorkType
+  targetHoursPerWeek Float
+  progressHours      Float      @default(0)
+  status             GoalStatus @default(active)
+  user               User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  blocks             Block[]
+
+  @@index([userId])
+}
+
+model EnergyProfile {
+  id           String     @id @default(cuid())
+  userId       String     @unique
+  chronotype   Chronotype @default(neutral)
+  hourlyScores Float[]
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model DeepWorkBudget {
+  id                String @id @default(cuid())
+  userId            String @unique
+  dailyCeilingHours Float  @default(5)
+  allocatedHours    Float  @default(0)
+  user              User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Block {
+  id               String      @id @default(cuid())
+  userId           String
+  start            DateTime
+  end              DateTime
+  type             WorkType
+  source           BlockSource
+  energyMatchScore Float       @default(0)
+  goalId           String?
+  /// The Google Calendar event id, when this block was written to the calendar.
+  externalEventId  String?
+  user             User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  goal             Goal?       @relation(fields: [goalId], references: [id], onDelete: SetNull)
+
+  @@index([userId, start])
+}
+
+model Ask {
+  id            String   @id @default(cuid())
+  userId        String
+  description   String
+  proposedStart DateTime?
+  durationMin   Int
+  verdict       String
+  rationale     String
+  suggestedStart DateTime?
+  suggestedEnd   DateTime?
+  displaces     String[]
+  status        String   @default("pending")
+  engine        String   @default("heuristic")
+  createdAt     DateTime @default(now())
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+model CheckIn {
+  id             String   @id @default(cuid())
+  userId         String
+  timestamp      DateTime @default(now())
+  plannedBlockId String?
+  actualType     WorkType
+  note           String?
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, timestamp])
 }

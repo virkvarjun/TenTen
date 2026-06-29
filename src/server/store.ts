@@ -10,6 +10,7 @@ import type {
 } from "@/domain/types";
 import { buildSchedule } from "@/domain/scheduler/scheduler";
 import { createBudget } from "@/domain/budget/budget";
+import { applyLearning, signalsFromCheckIns } from "@/domain/learning/learning";
 import { atHour, hourOf, startOfDay } from "@/domain/time";
 import { seedDay, DEMO_WEEK_FRACTION } from "@/server/mock/seed";
 import type { AskRecord, DaySnapshot } from "@/server/types";
@@ -34,6 +35,8 @@ interface DayState {
   budget: DeepWorkBudget;
   checkIns: CheckIn[];
   asks: AskRecord[];
+  /** ISO date string of the last day the learning loop ran (for idempotency). */
+  lastLearnedDay?: string;
 }
 
 const globalForStore = globalThis as unknown as { meridianStore?: DayState };
@@ -203,6 +206,34 @@ export function undoAsk(askId: string): boolean {
 export function declineAsk(askId: string): void {
   const record = state().asks.find((a) => a.id === askId);
   if (record) record.status = "declined";
+}
+
+export interface LearningResult {
+  ran: boolean;
+  reason?: string;
+  signals: number;
+}
+
+/**
+ * The nightly learning step: nudge the energy curve toward the hours where
+ * focused work actually happened today. Conservative (smooth) and idempotent —
+ * running twice on the same day is a no-op.
+ */
+export function runLearning(now: Date = new Date()): LearningResult {
+  const s = state();
+  const today = startOfDay(now).toISOString();
+  if (s.lastLearnedDay === today) {
+    return { ran: false, reason: "Already learned today.", signals: 0 };
+  }
+  const signals = signalsFromCheckIns(s.checkIns);
+  if (signals.length === 0) {
+    s.lastLearnedDay = today;
+    return { ran: false, reason: "No check-ins to learn from.", signals: 0 };
+  }
+  s.energy = applyLearning(s.energy, signals);
+  s.lastLearnedDay = today;
+  replan(s);
+  return { ran: true, signals: signals.length };
 }
 
 /** Reset the store to the seeded state — used by the demo and tests. */

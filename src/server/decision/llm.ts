@@ -118,7 +118,10 @@ function toDecision(parsed: LlmDecision, day: Date): Decision {
   return {
     verdict: parsed.verdict,
     suggestedSlot: parsed.suggestedSlot
-      ? { start: atHour(day, parsed.suggestedSlot.startHour), end: atHour(day, parsed.suggestedSlot.endHour) }
+      ? {
+          start: atHour(day, parsed.suggestedSlot.startHour),
+          end: atHour(day, parsed.suggestedSlot.endHour),
+        }
       : undefined,
     displaces: parsed.displaces,
     rationale: parsed.rationale,

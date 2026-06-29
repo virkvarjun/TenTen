@@ -80,7 +80,9 @@ export function computeFollowThrough(
   checkIns: CheckIn[],
   plannedTypeByBlockId: Map<string, WorkType>,
 ): FollowThrough {
-  const tied = checkIns.filter((c) => c.plannedBlockId && plannedTypeByBlockId.has(c.plannedBlockId));
+  const tied = checkIns.filter(
+    (c) => c.plannedBlockId && plannedTypeByBlockId.has(c.plannedBlockId),
+  );
   const onPlan = tied.filter(
     (c) => c.actualType === plannedTypeByBlockId.get(c.plannedBlockId!),
   ).length;
